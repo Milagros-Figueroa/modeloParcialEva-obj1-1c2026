@@ -1,0 +1,61 @@
+
+import EVAS.*
+import PilotosDisponibles.*
+import cuartel.*
+
+describe "El cuartel de prepara para despegar y los pilotos tambien.." {
+
+    test "Se intenta Sincronizar el Eva00 con el piloto Rei" {
+        eva00.mejorarCampoAt(10)
+        cuartel.nerv.puedeRegistrarEvas(eva00)
+        cuartel.nerv.puedeRegistrarPilotos(rei)
+        cuartel.nerv.intentaSincronizar(eva00, rei)
+        assert.equals(1, rei.puntosDeEntrenamiento())
+      
+    }
+  test "El EVA-01 no puede usarse más de 3 veces seguidas sin recargarse.  "
+   {
+    cuartel.nerv.puedeRegistrarEvas(eva01)
+    cuartel.nerv.puedeRegistrarPilotos(asuka)
+    cuartel.nerv.intentaSincronizar(eva01, asuka) //1
+    cuartel.nerv.intentaSincronizar(eva01, asuka) //2
+    cuartel.nerv.intentaSincronizar(eva01, asuka) //3
+    assert.throwsException({ cuartel.nerv.intentaSincronizar(eva01, asuka) })
+}
+    test "En modo ataque, el EVA-02 otorga 3 de entrenamiento y consume 20 de energía."
+     {
+        eva02.cambiarModo(ataque)
+        cuartel.nerv.puedeRegistrarEvas(eva02)
+        cuartel.nerv.puedeRegistrarPilotos(shinji)
+        cuartel.nerv.intentaSincronizar(eva02, shinji)
+        assert.equals(eva02.energia(), 80)
+        assert.equals(5,shinji.puntosDeEntrenamiento()) // 2 + 3 del modo ataque
+     }
+     test "Shinji puede al inicio sincronizar con el EVA-00." {
+        cuartel.nerv.intentaSincronizar(eva00, shinji)
+        assert.equals(shinji.puntosDeEntrenamiento(), 3) //2 + 1 del eva00
+       
+     }
+     test "Probar que Rei no puede realizar más de 5 sincronizaciones en total." {
+        eva00.mejorarCampoAt(10) //el campo at del eva00 ahora es 2110, lo que permite sincronizar a rei
+        cuartel.nerv.puedeRegistrarEvas(eva00)
+        cuartel.nerv.puedeRegistrarPilotos(rei)
+        cuartel.nerv.intentaSincronizar(eva00, rei)
+        cuartel.nerv.intentaSincronizar(eva00, rei)
+        cuartel.nerv.intentaSincronizar(eva00, rei)
+        cuartel.nerv.intentaSincronizar(eva00, rei)
+        cuartel.nerv.intentaSincronizar(eva00, rei)
+       
+       assert.throwsException({ cuartel.nerv.intentaSincronizar(eva00, rei) })
+     }
+     test "El cálculo del promedio de puntos de entrenamiento de los pilotos es correcto." {
+            cuartel.nerv.puedeRegistrarPilotos(rei)
+            cuartel.nerv.puedeRegistrarPilotos(asuka)
+            cuartel.nerv.puedeRegistrarPilotos(shinji)
+            //Rei tiene 0 puntos de entrenamiento, Asuka tiene 5 puntos de entrenamiento y Shinji tiene 3 puntos de entrenamiento, el promedio es (0 + 5 + 2) / 3 = 2.33
+             
+            assert.equals(2.333333, cuartel.nerv.promedioDePuntosDeEntrenamientoDeLosPilotos())
+       
+     }
+
+}
